@@ -1,84 +1,116 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+
 import 'package:flutter_svg/svg.dart';
-import 'package:plantilin/src/blocs/client_provider.dart';
 import 'package:provider/provider.dart';
+
+import 'package:plantilin/src/stores/main_store.dart';
 
 class ConnectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final ClientProvider client = Provider.of<ClientProvider>(context);
+    final store = Provider.of<MainStore>(context);
 
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 50.0),
+      padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 35.0),
       color: Colors.white,
       child: Center(
-        child: ListView(
-          children: <Widget>[
-            SizedBox(
-              height: 100.0,
-            ),
-            _connectedLogo(width * 0.15, height * 0.15, client.isConnected),
-            SizedBox(
-              height: 30.0,
-            ),
-            _textFields(client),
-          ],
+        child: Observer(
+          builder: (_) => ListView(
+            children: <Widget>[
+              _connectedLogo(width * 0.15, height * 0.15, store),
+              SizedBox(
+                height: 30.0,
+              ),
+              _textFields(store),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _connectedLogo(double width, double height, bool connected) {
+  Widget _connectedLogo(double width, double height, MainStore store) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        connected
+        !store.isConnected
             ? SvgPicture.asset(
-                'assets/link.svg',
+                'assets/unlink.svg',
                 width: width,
                 height: height,
               )
             : SvgPicture.asset(
-                'assets/unlink.svg',
+                'assets/link.svg',
                 width: width,
                 height: height,
               ),
         SizedBox(
           height: 20.0,
         ),
-        connected
+        !store.isConnected
             ? Text(
-                'Conectado',
+                'Desconectado',
                 style: TextStyle(fontSize: 18.0),
               )
             : Text(
-                'Desconectado',
+                'Conectado',
                 style: TextStyle(fontSize: 18.0),
               ),
       ],
     );
   }
 
-  Widget _textFields(ClientProvider client) {
+  Widget _textFields(MainStore store) {
     return Column(
       children: <Widget>[
         TextField(
-          autofocus: true,
+          enabled: !store.isConnected,
           decoration: InputDecoration(
             labelText: 'Servidor',
             hintText: '0.0.0.0',
-            prefixText: 'ws://',
+            // prefixIcon: Padding(
+            //   padding: EdgeInsets.only(right: 10.0),
+            //   child: Icon(Icons.cloud),
+            // ),
           ),
-          onChanged: (String value) => client.server = 'ws://$value',
+          onChanged: (String value) => store.server = value,
         ),
         TextField(
+          enabled: !store.isConnected,
           decoration: InputDecoration(
             labelText: 'Puerto',
-            hintText: '1884',
+            hintText: 'tcp: 1883 ws: 9001',
+            // prefixIcon: Padding(
+            //   padding: EdgeInsets.only(right: 10.0),
+            //   child: Icon(Icons.dns),
+            // ),
           ),
-          onChanged: (String value) => client.port = int.parse(value),
+          keyboardType: TextInputType.number,
+          onChanged: (String value) => store.port = int.parse(value),
+        ),
+        SizedBox(
+          height: 10.0,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Text(
+              'Usar websockets',
+              style: TextStyle(fontSize: 16.0),
+            ),
+            Observer(
+              builder: (_) => Switch(
+                activeColor: Colors.green[200],
+                onChanged: (value) =>
+                    store.isConnected ? null : store.onOffWebsockets(),
+                value: store.websockets,
+              ),
+            ),
+          ],
         ),
         SizedBox(
           height: 10.0,
@@ -86,15 +118,22 @@ class ConnectionPage extends StatelessWidget {
         Container(
           width: double.infinity,
           child: RaisedButton(
-            color: client.isConnected ? Colors.orange : Colors.green,
+            color: store.isConnected ? Colors.orange : Colors.green,
             textColor: Colors.white,
             child: Text(
-              client.isConnected ? 'Desconectar' : 'Conectar',
+              store.isConnected ? 'Desconectar' : 'Conectar',
               style: TextStyle(
                 fontSize: 16.0,
               ),
             ),
-            onPressed: client.isConnected ? client.disconnect : client.connect,
+            onPressed: () async {
+              if (store.isConnected) {
+                store.disconnect();
+                return;
+              }
+
+              await store.connect();
+            },
           ),
         ),
       ],

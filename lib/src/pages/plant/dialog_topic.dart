@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:plantilin/src/blocs/client_provider.dart';
+
+import 'package:plantilin/src/stores/main_store.dart';
+import 'package:provider/provider.dart';
 
 class DialogTopic {
   String _type;
   String _topic = '';
-  ClientProvider _client;
-  DialogTopic(this._type, this._client);
+  DialogTopic(this._type);
 
   void showTopicDialog(BuildContext context) {
     showDialog(
@@ -15,6 +16,7 @@ class DialogTopic {
   }
 
   SimpleDialog _buildDialog(BuildContext context) {
+    final store = Provider.of<MainStore>(context);
     return SimpleDialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
@@ -23,10 +25,13 @@ class DialogTopic {
       title: Text(
         'Suscribir al canal',
         textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 24.0,
+        ),
       ),
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
+          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
           child: TextField(
             decoration: InputDecoration(
               labelText: 'Canal',
@@ -37,12 +42,18 @@ class DialogTopic {
           ),
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
+          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
           child: RaisedButton(
-            child: Text('Suscribir'),
+            child: Text(
+              'Suscribir',
+              style: TextStyle(fontSize: 18.0),
+            ),
             color: Colors.green,
             colorBrightness: Brightness.dark,
-            onPressed: () => _client.subscribeToTopic(_type, _topic),
+            onPressed: () {
+              store.subscribe(_type, _topic);
+              Navigator.of(context).pop();
+            },
           ),
         ),
       ],
