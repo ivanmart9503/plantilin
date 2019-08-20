@@ -36,9 +36,8 @@ class DialogTopic {
             decoration: InputDecoration(
               labelText: 'Canal',
               hintText: 'topic...',
-              prefixText: 'plantilin/',
             ),
-            onChanged: (value) => _topic = 'plantilin/$value',
+            onChanged: (value) => _topic = '$value',
           ),
         ),
         Padding(

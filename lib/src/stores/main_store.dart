@@ -187,7 +187,7 @@ abstract class _MainStore with Store {
       'data': message,
     };
 
-    final response = await http.post('http://10.0.0.8:3000/plantilin',
+    final response = await http.post('https://desolate-sierra-60744.herokuapp.com/plantilin',
         body: jsonEncode(data), headers: {"content-type": "application/json"});
 
     return response.body;
@@ -196,7 +196,7 @@ abstract class _MainStore with Store {
   @action
   Future getData({reload: false}) async {
     if (reload || data.isEmpty) {
-      final response = await http.get('http://10.0.0.8:3000/plantilin',
+      final response = await http.get('https://desolate-sierra-60744.herokuapp.com/plantilin',
           headers: {'accept': 'application/json'});
       data = jsonDecode(response.body);
     }

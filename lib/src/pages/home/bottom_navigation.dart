@@ -15,7 +15,8 @@ class BottomNavigation extends StatelessWidget {
         selectedLabelStyle: TextStyle(fontSize: 14.0),
         unselectedLabelStyle: TextStyle(fontSize: 14.0),
         iconSize: 30.0,
-        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey[400],
+        selectedItemColor: Colors.grey[600],
         currentIndex: store.indexPage,
         onTap: store.onTap,
         items: [

@@ -104,7 +104,8 @@ class ConnectionPage extends StatelessWidget {
             ),
             Observer(
               builder: (_) => Switch(
-                activeColor: Colors.green[200],
+                activeColor:
+                    store.isConnected ? Colors.orange[200] : Colors.green[200],
                 onChanged: (value) =>
                     store.isConnected ? null : store.onOffWebsockets(),
                 value: store.websockets,
